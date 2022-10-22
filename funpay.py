@@ -9,8 +9,9 @@ class Script:
         self.driver = driver
 
     def funpay_auto_sell(self):
-        items = ['Golden', 'Skull', 'Mask', 'for', 'The', 'Trickster', 'Амулет', 'Боевитая', 'Стайка']
-        items_tuple = ('Golden Skull Mask for The Trickster', 'Амулет Боевитая Стайка')
+        items = ['Golden', 'Skull', 'Mask', 'for', 'The', 'Trickster',
+                 'Амулет', 'Боевитая', 'Стайка', 'Шелковый', 'амулет', 'омамори']
+        items_tuple = ('Golden Skull Mask for The Trickster', 'Амулет Боевитая Стайка', 'Шелковый амулет омамори')
 
         def check():
             while True:
@@ -52,7 +53,6 @@ class Script:
             # Сравнение старых номеров с новым
             if sale_number in sales_numbers:
                 print('\n-- Продажа уже была осуществлена --')
-
             # Если номера в файле не оказывается, осуществляем продажу
             else:
                 new_numbers = sale_number + ' ' + sales_numbers
@@ -77,8 +77,8 @@ class Script:
             with open(f'codes\\{item}.txt', 'w') as txt:
                 for i in code_to_save:
                     txt.write(i)
-                    time.sleep(1)
-                    txt.close()
+                    # time.sleep(5)
+                txt.close()
             send_code(new_sale, code_to_send)
 
         def code_text(code_to_send):
@@ -104,9 +104,10 @@ class Script:
                         2️⃣ Если Вам не сложно — оставьте отзыв о моей работе!'''
             chat = self.driver.find_element(By.XPATH, '//*[@id="comments"]/textarea')
             self.driver.execute_script(JS_ADD_TEXT_TO_INPUT, chat, text)
-            # send_button = self.driver.find_element(By.XPATH,
-            #                         '//*[@id="content"]/div/div/div/div[2]/div/div[2]/div[2]/div[3]/form/div[3]/button').click()
-            time.sleep(5)
+            time.sleep(2)
+            send_button = self.driver.find_element(By.XPATH,
+                                    '//*[@id="content"]/div/div/div/div[2]/div/div[2]/div[2]/div[3]/form/div[3]/button').click()
+            time.sleep(3)
 
         check()
 
