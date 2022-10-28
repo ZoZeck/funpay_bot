@@ -10,11 +10,21 @@ class Script:
 
     def funpay_auto_sell(self):
         items = ['Golden', 'Skull', 'Mask', 'for', 'The', 'Trickster',
-                 'Амулет', 'Боевитая', 'Стайка', 'Шелковый', 'амулет', 'омамори']
-        items_tuple = ('Golden Skull Mask for The Trickster', 'Амулет Боевитая Стайка', 'Шелковый амулет омамори')
+                 '300к', 'BP', '&', '1к', 'радужных', 'осколков',
+                 '400', '000', 'BloodPoints',
+                 'Амулет', 'сковородка', 'из', 'PUBG', '(Frying', 'pan)',
+                 'Амулет', 'Перья', 'Гордости']
 
+        items_tuple = ('Golden Skull Mask for The Trickster',
+                       '300к BP & 1к радужных осколков',
+                       '400 000 BloodPoints',
+                       'Амулет сковородка из PUBG (Frying pan)',
+                       'Амулет Перья Гордости')
+
+        category_list = ['Dead by Daylight, Прочее']
         def check():
             while True:
+                time.sleep(2)
                 global selling_item
                 selling_item = []
                 self.driver.get('https://funpay.com/')
@@ -28,17 +38,27 @@ class Script:
             self.driver.get('https://funpay.com/orders/trade')
             new_sale = self.driver.find_element(By.XPATH, '//*[@id="content"]/div/div/div/div[2]/a[1]')
             sale_description = new_sale.find_element(By.XPATH, '//*[@class="order-desc"]/div[1]')
+            category = new_sale.find_element(By.CLASS_NAME, 'text-muted')
             time.sleep(2)
-            # Кол-во предметов
-            for i in sale_description.text.splitlines():
-                amount = int(i.split()[-2])
-            # Нахождение названия предмета
-            for i in sale_description.text.split():
-                if i in items:
-                    selling_item.append(i)
-                    item = ' '.join(selling_item)
-                    if item in items_tuple:
-                        find_sell_number(new_sale, item, amount)
+            # Проверка категории
+            if category.text not in category_list:
+                # print(sale_number, ' <-- Номер последний продажи')
+                with open(f'sales_num.txt', 'r') as txt:
+                    sales_numbers = txt.read()
+                    txt.close()
+                print(sales_numbers.split()[0], ' <-- Номер последний продажи')
+                return
+            else:
+                # Кол-во предметов
+                for i in sale_description.text.splitlines():
+                    amount = int(i.split()[-2])
+                # Нахождение названия предмета
+                for i in sale_description.text.split():
+                    if i in items:
+                        selling_item.append(i)
+                        item = ' '.join(selling_item)
+                        if item in items_tuple:
+                            find_sell_number(new_sale, item, amount)
 
         def find_sell_number(new_sale, item, amount):
             # Нахождение номера заказа
@@ -52,7 +72,7 @@ class Script:
             print(sale_number, ' <-- Номер последний продажи')
             # Сравнение старых номеров с новым
             if sale_number in sales_numbers:
-                print('\n-- Продажа уже была осуществлена --')
+                print('-- Продажа уже была осуществлена --\n')
             # Если номера в файле не оказывается, осуществляем продажу
             else:
                 new_numbers = sale_number + ' ' + sales_numbers
@@ -77,7 +97,6 @@ class Script:
             with open(f'codes\\{item}.txt', 'w') as txt:
                 for i in code_to_save:
                     txt.write(i)
-                    # time.sleep(5)
                 txt.close()
             send_code(new_sale, code_to_send)
 
@@ -114,8 +133,26 @@ class Script:
 
 def main():
     options = Options()
-    options.add_argument('user-data-dir=C:\\Users\\coolm\\AppData\\Local\\Google\\Chrome\\User Data\\Default')
+    # options.add_argument('user-data-dir=C:\\Users\\coolm\\AppData\\Local\\Google\\Chrome\\User Data\\Default')
+    options.add_argument('user-data-dir=C:\\Users\\coolm\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 1')
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument('user-agent=coolm4432')
+    '''Задаю размер окна, что бы при запуске с параметром --headless
+                                                             все окошки зависящие от размера, были развернуты'''
+    options.add_argument('--window-size=1280,720')
+    options.add_argument('--headless')
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_argument("--mute-audio")
     driver = webdriver.Chrome(executable_path=r'chromedriver\\chromedriver.exe', chrome_options=options)
+    # По идеи должен отключать видимость того, что используется Selenium
+    driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+        "source": """
+              const newProto = navigator.__proto__
+              delete newProto.webdriver
+              navigator.__proto__ = newProto
+              """
+    })
+
 
     while True:
         time.sleep(2)
