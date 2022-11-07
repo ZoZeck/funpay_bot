@@ -3,6 +3,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import NoSuchElementException
 
 class Script:
     def __init__(self, driver):
@@ -13,26 +14,43 @@ class Script:
                  '300к', 'BP', '&', '1к', 'радужных', 'осколков',
                  '400', '000', 'BloodPoints',
                  'Амулет', 'сковородка', 'из', 'PUBG', '(Frying', 'pan)',
-                 'Амулет', 'Перья', 'Гордости']
+                 'Амулет', 'Перья', 'Гордости',
+                 'New', 'Vegas', 'Ultimate', 'Edition']
 
         items_tuple = ('Golden Skull Mask for The Trickster',
                        '300к BP & 1к радужных осколков',
                        '400 000 BloodPoints',
                        'Амулет сковородка из PUBG (Frying pan)',
-                       'Амулет Перья Гордости')
+                       'Амулет Перья Гордости',
+                       'New Vegas Ultimate Edition')
 
-        category_list = ['Dead by Daylight, Прочее']
+        category_list = ['Dead by Daylight, Прочее',
+                         'Twitch, Аккаунты',
+                         'Fallout 76, Ключи']
+
         def check():
             while True:
-                time.sleep(2)
-                global selling_item
-                selling_item = []
-                self.driver.get('https://funpay.com/')
-                sales_gonk = self.driver.find_element(By.XPATH, '//*[@id="navbar"]/ul[2]/li[2]/a/span')
-                time.sleep(2)
-                # Если поступает продажа или продажа существует, запуск процесса
-                if int(sales_gonk.text) >= 1:
-                    new_sale_description()
+                try:
+                    time.sleep(5)
+                    global selling_item
+                    selling_item = []
+                    self.driver.get('https://funpay.com/')
+                    sales_gonk = self.driver.find_element(By.XPATH, '//*[@id="navbar"]/ul[2]/li[2]/a/span')
+                    time.sleep(5)
+                    # Если поступает продажа или продажа существует, запуск процесса
+                    if sales_gonk.text == '':
+                        return
+                    elif int(sales_gonk.text) >= 1:
+                        new_sale_description()
+                except NoSuchElementException:
+                    try:
+                        if self.driver.find_element(By.XPATH, "//*[starts-with(text(),'Connection timed out')]"):
+                            time.sleep(10)
+                        elif self.driver.find_element(By.XPATH, "//*[starts-with(text(),'502 Bad Gateway')]"):
+                            time.sleep(10)
+                    finally:
+                        return
+
 
         def new_sale_description():
             self.driver.get('https://funpay.com/orders/trade')
@@ -51,7 +69,10 @@ class Script:
             else:
                 # Кол-во предметов
                 for i in sale_description.text.splitlines():
-                    amount = int(i.split()[-2])
+                    if category.text == 'Twitch, Аккаунты':
+                        amount = 1
+                    else:
+                        amount = int(i.split()[-2])
                 # Нахождение названия предмета
                 for i in sale_description.text.split():
                     if i in items:
@@ -140,7 +161,7 @@ def main():
     '''Задаю размер окна, что бы при запуске с параметром --headless
                                                              все окошки зависящие от размера, были развернуты'''
     options.add_argument('--window-size=1280,720')
-    options.add_argument('--headless')
+    # options.add_argument('--headless')
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_argument("--mute-audio")
     driver = webdriver.Chrome(executable_path=r'chromedriver\\chromedriver.exe', chrome_options=options)
