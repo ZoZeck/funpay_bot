@@ -7,6 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 
+from telegram_bot import send_message
+
 
 def nums_editor(method, order_number):
     method, order_number = method, order_number
@@ -46,7 +48,7 @@ def code_text(code_to_send):
 class AutoSale:
     def __init__(self, driver):
         self.driver = driver
-        self.categories = ['Dead by Daylight, Прочее', 'Twitch, Аккаунты']
+        self.categories = ['Dead by Daylight, Прочее', 'Twitch, Аккаунты', 'Steam, Пополнение баланса']
         self.selling_items = []
         self.items = ['Golden', 'Skull', 'Mask', 'for', 'The', 'Trickster',
                       'Амулет', 'Перья', 'Гордости',
@@ -81,6 +83,8 @@ class AutoSale:
                 self.new_sale_check()
             elif sale_category in sale_category and sale_category == 'Twitch, Аккаунты':
                 amount = 1
+            elif sale_category in sale_category and sale_category == 'Steam, Пополнение баланса':
+                send_message(order_number)
             else:
                 for i in sale_description.split():
                     try:
@@ -123,9 +127,9 @@ def main():
 
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument('user-agent=Funpay_Bot')
-    options.add_argument('--window-size=1280,720')
+    options.add_argument('--window-size=1440,900')
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    options.add_argument('--headless')
+    # options.add_argument('--headless') Почему-то не работает нормально
     options.add_argument("--mute-audio")
     service_object = Service(binary_path)
 
