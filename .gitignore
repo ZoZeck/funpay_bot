@@ -7,5 +7,6 @@ Data/config.yml
 FunPay_User/*
 
 # ??
+__pychache__
 .idea
 
